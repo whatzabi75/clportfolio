@@ -8,8 +8,10 @@ gunicorn
 yfinance
 python-dotenv
 openai
+sentence-transformers
 faiss-cpu
 langchain
 langchain-openai
 PyPDF2
 numpy
+sentence-transformers
