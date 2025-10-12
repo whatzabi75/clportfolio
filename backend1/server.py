@@ -17,14 +17,14 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 GROUND_TRUTHS = {
-    "what is meeting digest": (
+    "What is Meeting Digest?": (
         "Meeting Digests is a feature within Salesforce Meetings that enhances sales reps' "
         "interactions with prospects and customers by providing a unified view of meeting information. "
         "It helps sales reps prepare for meetings by gathering and sharing insights about attendees, "
         "meeting details, and related activities on a single page."
     ),
 
-    "how can i use meeting digest": (
+    "How can I use Meeting Digest?": (
         "To start using Meeting Digest, here are some steps:\n"
         "1. Enable Salesforce Meetings: Ensure that Meeting Digest is enabled.\n"
         "2. Assign Permissions: Reassign users to the permission set.\n"
@@ -33,7 +33,7 @@ GROUND_TRUTHS = {
         "5. Take Action on Attendee Details: Update attendee details, start emails, or add new records."
     ),
 
-    "how can meeting digest drive value": (
+    "How can Meeting Digest drive value?": (
         "Here are some ways it can add value:\n\n"
         "1. Unified Information: Meeting Digest unifies all relevant information about meeting attendees.\n"
         "2. Enhanced Engagement: The Meeting Studio feature within Meeting Digest allows reps to keep attendees engaged during virtual meetings.\n"
@@ -132,6 +132,7 @@ def temperature_demo():
     question_emb = model.encode(question, convert_to_tensor=True)
     best_match = None
     best_score = 0.0
+
     for topic, truth in GROUND_TRUTHS.items():
         topic_emb = model.encode(topic, convert_to_tensor=True)
         score = float(util.cos_sim(question_emb, topic_emb))
