@@ -17,10 +17,30 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 GROUND_TRUTHS = {
-    "return policy": "We accept returns within 30 days of delivery when the item is unused and in its original packaging. Start the process from your account portal or contact support for help.",
-    "order status": "Orders typically ship within two business days. Use the tracking link in your confirmation email or visit the order history page to see the latest updates.",
-    "subscription cancellation": "You can cancel your subscription at any time from the billing settings page. Your plan stays active until the end of the current billing cycle with no additional charges.",
-    "technical support": "If you encounter a technical issue, restart the app and check for updates. If the problem persists, reach out to support with your device details and error message for faster assistance.",
+    "what is meeting digest": (
+        "Meeting Digests is a feature within Salesforce Meetings that enhances sales reps' "
+        "interactions with prospects and customers by providing a unified view of meeting information. "
+        "It helps sales reps prepare for meetings by gathering and sharing insights about attendees, "
+        "meeting details, and related activities on a single page."
+    ),
+
+    "how can i use meeting digest": (
+        "To start using Meeting Digest, here are some steps:\n"
+        "1. Enable Salesforce Meetings: Ensure that Meeting Digest is enabled.\n"
+        "2. Assign Permissions: Reassign users to the permission set.\n"
+        "3. Utilize Einstein Activity Capture: Implement an activity sync.\n"
+        "4. Prepare for Meetings: Use the Meeting Digest to gather and share information before meetings.\n"
+        "5. Take Action on Attendee Details: Update attendee details, start emails, or add new records."
+    ),
+
+    "how can meeting digest drive value": (
+        "Here are some ways it can add value:\n\n"
+        "1. Unified Information: Meeting Digest unifies all relevant information about meeting attendees.\n"
+        "2. Enhanced Engagement: The Meeting Studio feature within Meeting Digest allows reps to keep attendees engaged during virtual meetings.\n"
+        "3. Actionable Insights: Meeting Digest provides insights into high-priority cases and outstanding customer requests.\n"
+        "4. Streamlined Follow-Up: After the meeting, Meeting Digest offers reminders and quick actions for follow-up tasks.\n"
+        "5. Improved Collaboration: With the ability to update attendee details directly from the Meeting Digest, sales reps can stay focused on meeting preparation and execution."
+    )
 }
 
 app = Flask(__name__)
@@ -96,6 +116,9 @@ def rag_chat():
     return jsonify({"status": "ok", "answer": answer})
 
 
+#------------------------------------
+# Temperature Demo Route
+#------------------------------------
 @app.route("/api/temperature", methods=["POST"])
 def temperature_demo():
     data = request.get_json()
@@ -103,9 +126,9 @@ def temperature_demo():
     temperature = float(data.get("temperature", 0.7))
 
     if not question:
-        return jsonify({"error": "No question provided"}), 400
+        return jsonify({"error": "Question is required"}), 400
 
-    # Identify closest topic (if any)
+    # Step 1: Identify closest known ground truth topic
     question_emb = model.encode(question, convert_to_tensor=True)
     best_match = None
     best_score = 0.0
@@ -115,14 +138,14 @@ def temperature_demo():
         if score > best_score:
             best_score, best_match = score, topic
 
-    expected_answer = GROUND_TRUTHS[best_match] if best_score > 0.55 else None
+    expected_answer = GROUND_TRUTHS[best_match] if best_score > 0.50 else None
 
-    # Generate LLM response
+    # Step 2: Generate LLM response
     completion = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "You are a helpful and factual customer support assistant."},
-            {"role": "user", "content": question}
+            {"role": "system", "content": "You are a helpful, factual support assistant."},
+            {"role": "user", "content": question},
         ],
         temperature=temperature,
         max_tokens=200,
@@ -130,7 +153,7 @@ def temperature_demo():
 
     response_text = completion.choices[0].message.content.strip()
 
-    # Similarity (if we have ground truth)
+    # Step 3: Similarity comparison
     similarity = None
     if expected_answer:
         emb1 = model.encode(expected_answer, convert_to_tensor=True)
@@ -141,10 +164,5 @@ def temperature_demo():
         "temperature": temperature,
         "response": response_text,
         "expected_answer": expected_answer,
-        "similarity": similarity,
+        "similarity": similarity
     })
-
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
