@@ -26,8 +26,8 @@ export default function ProjectsPage() {
     },
     {
       title: "Stochastic vs. Deterministic Output",
-      description: "A Proof of Concept that allows modeleing the LLMs temperature to minimize the delta between two outputs. Use case: Support Agent recommendation consistency!",
-      tech: ["Python", "Flask", "GPT-4o-mini", "Next.js", "TailwindCSS", "all-MiniLM-L6-v2", "Docker"],
+      description: "A Proof of Concept that asks the same question 5 times with a loose and a strict, grounded prompt, and measures how close and how consistent the answers are against a ground truth. Use case: Support Agent recommendation consistency!",
+      tech: ["Python", "Flask", "Claude Haiku 4.5", "Next.js", "TailwindCSS", "all-MiniLM-L6-v2", "Docker"],
       image: "/temperature-poc.jpg",
       link: "/projects/temperature-poc",
     },

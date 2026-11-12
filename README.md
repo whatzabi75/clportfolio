@@ -33,4 +33,4 @@ Needs `backend/.env` with `ANTHROPIC_API_KEY=...` (see `backend/.env.example`).
 ## Notes
 - `backend/requirements.txt` is pinned. Upgrade one package at a time and retest.
 - Locally the backend runs with `flask run` — gunicorn crashes on macOS (fork-safety); Railway (Linux) uses gunicorn.
-- The Anthropic API no longer accepts `temperature` (Nov 2026). The Stochastic vs. Deterministic demo depends on it and needs a redesign.
+- The Anthropic API no longer accepts `temperature` (Nov 2026). The Stochastic vs. Deterministic demo was redesigned to compare a loose vs. a strict prompt over 5 runs each (`POST /api/prompt-consistency`).

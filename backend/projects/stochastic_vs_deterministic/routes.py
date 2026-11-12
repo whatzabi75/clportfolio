@@ -1,53 +1,51 @@
+from concurrent.futures import ThreadPoolExecutor
+
 from flask import Blueprint, request, jsonify
 
-from .logic import GROUND_TRUTHS, model, util, client, ANTHROPIC_MODEL
+from .logic import (
+    RUNS_PER_PROMPT,
+    find_ground_truth,
+    generate_answer,
+    loose_system_prompt,
+    strict_system_prompt,
+    summarize_runs,
+)
 
 bp = Blueprint("stochastic_vs_deterministic", __name__)
 
 
-@bp.route("/api/temperature", methods=["POST"])
-def temperature_demo():
-    data = request.get_json()
+@bp.route("/api/prompt-consistency", methods=["POST"])
+def prompt_consistency_demo():
+    data = request.get_json(silent=True) or {}
     question = data.get("question", "").strip()
-    temperature = float(data.get("temperature", 0.7))
 
     if not question:
         return jsonify({"error": "Question is required"}), 400
 
-    # Step 1: Identify closest known ground truth topic
-    question_emb = model.encode(question, convert_to_tensor=True)
-    best_match = None
-    best_score = 0.0
+    topic, expected_answer = find_ground_truth(question)
+    prompts = {
+        "loose": loose_system_prompt(),
+        "strict": strict_system_prompt(expected_answer),
+    }
 
-    for topic, truth in GROUND_TRUTHS.items():
-        topic_emb = model.encode(topic, convert_to_tensor=True)
-        score = float(util.cos_sim(question_emb, topic_emb))
-        if score > best_score:
-            best_score, best_match = score, topic
+    # Ask the same question several times per prompt, all calls in parallel.
+    jobs = [(name, system) for name, system in prompts.items() for _ in range(RUNS_PER_PROMPT)]
+    try:
+        with ThreadPoolExecutor(max_workers=len(jobs)) as pool:
+            answers = list(pool.map(lambda job: generate_answer(job[1], question), jobs))
+    except Exception as exc:  # surface API problems to the page instead of a bare 500
+        return jsonify({"error": f"LLM call failed: {exc}"}), 502
 
-    expected_answer = GROUND_TRUTHS[best_match] if best_score > 0.50 else None
-
-    # Step 2: Generate LLM response
-    completion = client.messages.create(
-        model=ANTHROPIC_MODEL,
-        max_tokens=200,
-        system="You are a helpful, factual support assistant.",
-        messages=[{"role": "user", "content": question}],
-        temperature=temperature,
-    )
-
-    response_text = completion.content[0].text.strip()
-
-    # Step 3: Similarity comparison
-    similarity = None
-    if expected_answer:
-        emb1 = model.encode(expected_answer, convert_to_tensor=True)
-        emb2 = model.encode(response_text, convert_to_tensor=True)
-        similarity = round(float(util.cos_sim(emb1, emb2)[0][0]) * 100, 1)
+    results = {}
+    for name in prompts:
+        runs = [answer for (job_name, _), answer in zip(jobs, answers) if job_name == name]
+        results[name] = summarize_runs(runs, expected_answer)
 
     return jsonify({
-        "temperature": temperature,
-        "response": response_text,
+        "question": question,
+        "matched_topic": topic,
         "expected_answer": expected_answer,
-        "similarity": similarity
+        "runs_per_prompt": RUNS_PER_PROMPT,
+        "loose": {"system_prompt": prompts["loose"], **results["loose"]},
+        "strict": {"system_prompt": prompts["strict"], **results["strict"]},
     })

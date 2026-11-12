@@ -1,1 +1,1 @@
-"""Stochastic vs. Deterministic — how LLM temperature changes answer consistency."""
+"""Stochastic vs. Deterministic — how prompting tames answer variance (temperature is no longer an API option)."""

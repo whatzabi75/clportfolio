@@ -24,7 +24,7 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 app.register_blueprint(emotion_detection_bp)           # POST /analyze
 app.register_blueprint(stock_analyzer_bp)              # POST /stock-analyzer
 app.register_blueprint(custom_llm_chatbot_bp)          # POST /rag-upload, /rag-chat
-app.register_blueprint(stochastic_vs_deterministic_bp) # POST /api/temperature
+app.register_blueprint(stochastic_vs_deterministic_bp) # POST /api/prompt-consistency
 
 
 @app.route("/health")
