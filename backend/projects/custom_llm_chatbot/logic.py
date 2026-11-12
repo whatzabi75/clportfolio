@@ -4,7 +4,7 @@ import faiss
 import pickle
 import numpy as np
 from PyPDF2 import PdfReader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_anthropic import ChatAnthropic
 
@@ -14,7 +14,7 @@ from shared.llm import ANTHROPIC_MODEL
 faiss_index = None
 documents = []
 embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-llm = ChatAnthropic(model=ANTHROPIC_MODEL, temperature=0)
+llm = ChatAnthropic(model=ANTHROPIC_MODEL)  # temperature no longer accepted by the API (Nov 2026)
 
 #------------------------------------
 # Process PDF: parse, chunk, embed, store in FAISS
