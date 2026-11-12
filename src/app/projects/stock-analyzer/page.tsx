@@ -35,7 +35,7 @@ const [analystRatings, setAnalystRatings] = useState({ buy: 0, hold: 0, sell: 0 
   setSubmitted(true);
 
   try {
-    const res = await fetch("https://backend-code-production-77c7.up.railway.app/stock-analyzer", {
+    const res = await fetch("http://localhost:8000/stock-analyzer", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ symbol, range }),
@@ -77,7 +77,7 @@ const [analystRatings, setAnalystRatings] = useState({ buy: 0, hold: 0, sell: 0 
     if (!symbol) return;
 
     try {
-      const res = await fetch("https://backend-code-production-77c7.up.railway.app/stock-analyzer", {
+      const res = await fetch("http://localhost:8000/stock-analyzer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ symbol, range }),
