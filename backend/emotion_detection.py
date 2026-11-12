@@ -10,7 +10,7 @@ emotion_pipeline = pipeline(
 
 def _none_payload():
     return {
-        "scores": scores,
+        "scores": {},
         "dominant_emotion": None,
         "recommendation": None,
     }

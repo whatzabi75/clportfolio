@@ -7,11 +7,12 @@ torch
 gunicorn
 yfinance
 python-dotenv
-openai
+anthropic
 sentence-transformers
 faiss-cpu
 langchain
-langchain-openai
+langchain-anthropic
+langchain-huggingface
 PyPDF2
 numpy
 sentence-transformers

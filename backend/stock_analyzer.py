@@ -1,9 +1,9 @@
 import os
+import anthropic
 import yfinance as yf
-from openai import OpenAI
 
-# Initialize OpenAI client with environment variable
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Initialize Anthropic client with environment variable
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 def safe_round(value, decimals=2):
     try:
@@ -91,18 +91,18 @@ def stock_analyzer(symbol: str, range: str = "6mo"):
         try:
             recs = stock.recommendations_summary
             if recs is not None and not recs.empty:
-                latest = recs.iloc[-1]
+                latest = recs.iloc[-1].to_dict()
                 analyst_ratings = {
-                    "Strong Buy": recs.get("Strong Buy", 0),
-                    "Buy": recs.get("Buy", 0),
-                    "Hold": recs.get("Hold", 0),
-                    "Underperform": recs.get("Underperform", 0),
-                    "Sell": recs.get("Sell", 0),
+                    "Strong Buy": int(latest.get("strongBuy", 0)),
+                    "Buy": int(latest.get("buy", 0)),
+                    "Hold": int(latest.get("hold", 0)),
+                    "Underperform": int(latest.get("underperform", 0)),
+                    "Sell": int(latest.get("sell", 0)),
                 }
             else:
-                analyst_ratings = {"buy": 0, "hold": 0, "sell": 0}
+                analyst_ratings = {"Strong Buy": 0, "Buy": 0, "Hold": 0, "Underperform": 0, "Sell": 0}
         except Exception:
-            analyst_ratings = {"buy": 0, "hold": 0, "sell": 0}
+            analyst_ratings = {"Strong Buy": 0, "Buy": 0, "Hold": 0, "Underperform": 0, "Sell": 0}
 
         # Fetch historical price data
         try:
@@ -167,14 +167,11 @@ Please provide a concise analysis (3–5 sentences) that covers:
 Keep your tone professional and data-driven.
     """
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are an expert equity analyst."},
-            {"role": "user", "content": prompt}
-        ],
+    response = client.messages.create(
+        model="claude-haiku-4-5-20251001",
         max_tokens=250,
-        temperature=0.7,
+        system="You are an expert equity analyst.",
+        messages=[{"role": "user", "content": prompt}],
     )
 
-    return response.choices[0].message.content.strip()
+    return response.content[0].text.strip()

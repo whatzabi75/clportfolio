@@ -5,13 +5,14 @@ import pickle
 import numpy as np
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_anthropic import ChatAnthropic
 
 # Global FAISS index + mapping for retrieval
 faiss_index = None
 documents = []
-embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")  # cheap + fast
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)  # low-cost, adjust if needed
+embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+llm = ChatAnthropic(model="claude-haiku-4-5-20251001", temperature=0)
 
 #------------------------------------
 # Process PDF: parse, chunk, embed, store in FAISS
@@ -80,5 +81,5 @@ def answer_question(question):
     Answer:
     """
 
-    response = llm.predict(prompt)
-    return response
+    response = llm.invoke(prompt)
+    return response.content

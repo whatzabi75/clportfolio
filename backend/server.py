@@ -4,7 +4,7 @@ load_dotenv()
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from openai import OpenAI
+import anthropic
 from emotion_detection import emotion_detector  # adjust import to your function
 from stock_analyzer import stock_analyzer  # import the stock analyzer function
 
@@ -12,7 +12,7 @@ from rag_upload import process_pdf, answer_question  # import the RAG deployment
 
 from sentence_transformers import SentenceTransformer, util
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -142,17 +142,15 @@ def temperature_demo():
     expected_answer = GROUND_TRUTHS[best_match] if best_score > 0.50 else None
 
     # Step 2: Generate LLM response
-    completion = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are a helpful, factual support assistant."},
-            {"role": "user", "content": question},
-        ],
-        temperature=temperature,
+    completion = client.messages.create(
+        model="claude-haiku-4-5-20251001",
         max_tokens=200,
+        system="You are a helpful, factual support assistant.",
+        messages=[{"role": "user", "content": question}],
+        temperature=temperature,
     )
 
-    response_text = completion.choices[0].message.content.strip()
+    response_text = completion.content[0].text.strip()
 
     # Step 3: Similarity comparison
     similarity = None
@@ -167,3 +165,6 @@ def temperature_demo():
         "expected_answer": expected_answer,
         "similarity": similarity
     })
+
+if __name__ == "__main__":
+    app.run(debug=True)
