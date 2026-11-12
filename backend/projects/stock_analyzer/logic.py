@@ -1,9 +1,6 @@
-import os
-import anthropic
 import yfinance as yf
 
-# Initialize Anthropic client with environment variable
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+from shared.llm import client, ANTHROPIC_MODEL
 
 def safe_round(value, decimals=2):
     try:
@@ -135,7 +132,7 @@ def stock_analyzer(symbol: str, range: str = "6mo"):
     
 def run_llm_analysis(financials, company_summary):
     """
-    Use OpenAI to generate a stock analysis verdict.
+    Use Claude to generate a stock analysis verdict.
     """
     # Key metrics used to feed into the LLM
     key_metrics = {
@@ -168,7 +165,7 @@ Keep your tone professional and data-driven.
     """
 
     response = client.messages.create(
-        model="claude-haiku-4-5-20251001",
+        model=ANTHROPIC_MODEL,
         max_tokens=250,
         system="You are an expert equity analyst.",
         messages=[{"role": "user", "content": prompt}],

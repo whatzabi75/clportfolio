@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BACKEND_URL } from "@/lib/backend";
 
 type EmotionResult = {
   dominant_emotion: string;
@@ -19,7 +20,7 @@ export default function EmotionDetectorPage() {
     setResult(null);
 
     try {
-      const response = await fetch("https://backend-code-production-77c7.up.railway.app/analyze", {
+      const response = await fetch(`${BACKEND_URL}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: inputText }),

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BACKEND_URL } from "@/lib/backend";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ResponseData {
@@ -15,9 +16,6 @@ export default function TemperatureDemo() {
   const [temperature, setTemperature] = useState(0.7);
   const [responses, setResponses] = useState<ResponseData[]>([]);
   const [loading, setLoading] = useState(false);
-
-  const BACKEND_URL =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:5000";
 
   const handleSubmit = async () => {
     if (!question.trim()) return;

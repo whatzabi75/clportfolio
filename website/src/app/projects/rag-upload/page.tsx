@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { BACKEND_URL } from "@/lib/backend";
 
 export default function RagDeploymentPage() {
-  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL!;
   const [file, setFile] = useState<File | null>(null);
   const [isTraining, setIsTraining] = useState(false);
   const [isTrained, setIsTrained] = useState(false);

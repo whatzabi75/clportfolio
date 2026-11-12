@@ -1,0 +1,19 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+
+# macOS / editors
+.DS_Store
+.vscode/

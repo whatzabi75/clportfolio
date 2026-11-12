@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BACKEND_URL } from "@/lib/backend";
 import {
   LineChart,
   Line,
@@ -35,7 +36,7 @@ const [analystRatings, setAnalystRatings] = useState({ buy: 0, hold: 0, sell: 0 
   setSubmitted(true);
 
   try {
-    const res = await fetch("http://localhost:8000/stock-analyzer", {
+    const res = await fetch(`${BACKEND_URL}/stock-analyzer`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ symbol, range }),
@@ -77,7 +78,7 @@ const [analystRatings, setAnalystRatings] = useState({ buy: 0, hold: 0, sell: 0 
     if (!symbol) return;
 
     try {
-      const res = await fetch("http://localhost:8000/stock-analyzer", {
+      const res = await fetch(`${BACKEND_URL}/stock-analyzer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ symbol, range }),
